@@ -109,39 +109,31 @@ local function toggle_hunk(change, side, line)
 end
 
 local function set_global_bindings(layout, buf)
-  vim.keymap.set("n", "g?", function()
-    ui.help.create()
-  end, {
-    buffer = buf,
-    desc = "Open hunk.nvim help",
-  })
+  local function map(mode, lhs, rhs, desc)
+    vim.keymap.set(mode, lhs, rhs, {
+      buffer = buf,
+      desc = desc,
+      nowait = true,
+    })
+  end
+
+  map("n", "g?", ui.help.create, "Open hunk.nvim help")
 
   for _, chord in ipairs(utils.into_table(config.keys.global.accept)) do
-    vim.keymap.set("n", chord, function()
+    map("n", chord, function()
       api.changeset.write_changeset(CONTEXT.changeset, CONTEXT.output or CONTEXT.right)
-      vim.cmd("qa")
-    end, {
-      buffer = buf,
-      desc = "Accept the current selection",
-    })
+      vim.cmd.qa()
+    end, "qa")
   end
 
   for _, chord in ipairs(utils.into_table(config.keys.global.quit)) do
-    vim.keymap.set("n", chord, function()
-      vim.cmd("cq")
-    end, {
-      buffer = buf,
-      desc = "Cancel selection and quit",
-    })
+    map("n", chord, vim.cmd.cq, "Cancel selection and quit")
   end
 
   for _, chord in ipairs(utils.into_table(config.keys.global.focus_tree)) do
-    vim.keymap.set("n", chord, function()
+    map("n", chord, function()
       vim.api.nvim_set_current_win(layout.tree)
-    end, {
-      buffer = buf,
-      desc = "Focus hunk.nvim file-tree",
-    })
+    end, "Focus hunk.nvim file-tree")
   end
 end
 
