@@ -12,7 +12,7 @@ This is a Neovim tool for splitting/editing diffs. It operates over a `left` and
 the two which can subsequently be inspected and modified. The `DiffEditor` allows selecting changes by file, hunk or
 individual line to produce a new partial diff.
 
-This was primarily built to be used with [jujutsu](https://github.com/martinvonz/jj) as an alternative diff-editor to
+This was primarily built to be used with [jujutsu](https://github.com/jj-vcs/jj) as an alternative diff-editor to
 it's `:builtin` option, but it's designed generically enough that it can be used for other use cases.
 
 To use it you need to give it two to three directories: a `left`, a `right`, and optionally a `output` directory. These
@@ -229,7 +229,7 @@ require("hunk").setup({
 
 ## Using with Jujutsu
 
-[Jujutsu](https://github.com/martinvonz/jj) is an alternative VCS that has a focus on working with individual commits
+[Jujutsu](https://github.com/jj-vcs/jj) is an alternative VCS that has a focus on working with individual commits
 and their diffs.
 
 A lot of commands in jujutsu allow you to select parts of a diff. The tool used to select the diff can be configured via
@@ -241,7 +241,7 @@ diff-editor = ["nvim", "-c", "DiffEditor $left $right $output"]
 ```
 
 You can find more info on this config in
-[the jujutsu docs](https://martinvonz.github.io/jj/latest/config/#editing-diffs).
+[the jujutsu docs](https://docs.jj-vcs.dev/latest/config/#editing-diffs).
 
 ### Suppressing the `JJ-INSTRUCTIONS` file
 
