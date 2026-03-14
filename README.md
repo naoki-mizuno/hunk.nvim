@@ -242,3 +242,13 @@ diff-editor = ["nvim", "-c", "DiffEditor $left $right $output"]
 
 You can find more info on this config in
 [the jujutsu docs](https://martinvonz.github.io/jj/latest/config/#editing-diffs).
+
+### Suppressing the `JJ-INSTRUCTIONS` file
+
+To suppress the `JJ-INSTRUCTIONS` file that jujutsu injects into the diff editor, set
+[`ui.diff-instructions = false`](https://docs.jj-vcs.dev/latest/config/#jj-instructions) in your jujutsu `config.toml`:
+
+```toml
+[ui]
+diff-instructions = false
+```
