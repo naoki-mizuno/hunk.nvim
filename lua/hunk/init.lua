@@ -127,7 +127,17 @@ local function set_global_bindings(layout, buf)
   end
 
   for _, chord in ipairs(utils.into_table(config.keys.global.quit)) do
-    map("n", chord, vim.cmd.cq, "Cancel selection and quit")
+    map("n", chord, function()
+      if config.ui.confirm_before_quit then
+        vim.ui.select({ "Yes", "No" }, { prompt = "Quit without saving?" }, function(choice)
+          if choice == "Yes" then
+            vim.cmd.cq()
+          end
+        end)
+      else
+        vim.cmd.cq()
+      end
+    end, "Cancel selection and quit")
   end
 
   for _, chord in ipairs(utils.into_table(config.keys.global.focus_tree)) do
