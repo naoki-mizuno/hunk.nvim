@@ -38,6 +38,8 @@ local M = {
     },
     --- Can be either `vertical` or `horizontal`
     layout = "vertical",
+    --- Show a confirmation before quitting
+    confirm_before_quit = false,
   },
 
   icons = {
