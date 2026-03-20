@@ -225,20 +225,25 @@ function M.create(opts)
 
   local callback_opts = { tree = Component }
 
+  local function map(mode, lhs, rhs, desc)
+    vim.keymap.set(mode, lhs, rhs, {
+      buffer = buf,
+      desc = desc,
+      nowait = true,
+    })
+  end
+
   for _, chord in ipairs(utils.into_table(config.keys.tree.open_file)) do
-    vim.keymap.set("n", chord, function()
+    map("n", chord, function()
       local node = tree:get_node()
       if node and node.type == "file" then
         opts.on_open(node.change, callback_opts)
       end
-    end, {
-      buffer = buf,
-      desc = "Open file under cursor",
-    })
+    end, "Open file under cursor")
   end
 
   for _, chord in ipairs(utils.into_table(config.keys.tree.expand_node)) do
-    vim.keymap.set("n", chord, function()
+    map("n", chord, function()
       local node = tree:get_node()
       if not node then
         return
@@ -250,27 +255,21 @@ function M.create(opts)
         node:expand()
         Component.render()
       end
-    end, {
-      buffer = buf,
-      desc = "Expand or preview node under cursor",
-    })
+    end, "Expand or preview node under cursor")
   end
 
   for _, chord in ipairs(utils.into_table(config.keys.tree.collapse_node)) do
-    vim.keymap.set("n", chord, function()
+    map("n", chord, function()
       local node = tree:get_node()
       if node and node.type == "dir" and node:is_expanded() then
         node:collapse()
         Component.render()
       end
-    end, {
-      buffer = buf,
-      desc = "Collapse node under cursor",
-    })
+    end, "Collapse node under cursor")
   end
 
   for _, chord in ipairs(utils.into_table(config.keys.tree.toggle_file)) do
-    vim.keymap.set("n", chord, function()
+    map("n", chord, function()
       local node = tree:get_node()
       if node and node.type == "file" then
         opts.on_toggle(node.change, nil, callback_opts)
@@ -282,10 +281,7 @@ function M.create(opts)
       for _, change in ipairs(changeset) do
         opts.on_toggle(change, state ~= "all", callback_opts)
       end
-    end, {
-      buffer = buf,
-      desc = "Toggle all hunks in file under cursor",
-    })
+    end, "Toggle all hunks in file under cursor")
   end
 
   config.hooks.on_tree_mount({ buf = buf, tree = tree, opts = opts })
