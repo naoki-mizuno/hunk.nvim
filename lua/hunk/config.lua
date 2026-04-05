@@ -34,7 +34,24 @@ local M = {
     tree = {
       -- Mode can either be `nested` or `flat`
       mode = "nested",
+      -- Width of the tree (or float). 0 = auto-fit, 0 < n <= 1 = fraction of editor, n > 1 = columns
       width = 35,
+      use_float = false,
+      float = {
+        -- Height of the floating window.
+        -- 0 = auto-fit to content, 0 < n <= 1 = fraction of editor height, n > 1 = lines
+        height = 0,
+        -- Border style: "rounded", "single", "double", "solid", "shadow", "none",
+        -- or a custom array of border characters (see nui.popup docs)
+        border = "rounded",
+        -- Where to place the float: "left", "right", or "center"
+        -- left/right are top-aligned; center is fully centered.
+        position = "left",
+        -- Padding inside the float border: top/right/bottom/left
+        padding = { left = 1, right = 1 },
+        -- Keys to close the floating tree
+        close = { "<Esc>" },
+      },
     },
     --- Can be either `vertical` or `horizontal`
     layout = "vertical",

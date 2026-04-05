@@ -3,6 +3,7 @@ local config = require("hunk.config")
 local utils = require("hunk.utils")
 
 local NuiTree = require("nui.tree")
+local NuiPopup = require("nui.popup")
 local Text = require("nui.text")
 local Line = require("nui.line")
 
@@ -163,12 +164,153 @@ local function get_file_icon(change)
   return config.icons.deselected
 end
 
+local function count_tree_nodes(nodes)
+  local count = 0
+  for _, node in ipairs(nodes) do
+    count = count + 1
+    if node.children and #node.children > 0 then
+      count = count + count_tree_nodes(node.children)
+    end
+  end
+  return count
+end
+
+local function compute_tree_width(nodes, depth, icon_widths)
+  depth = depth or 1
+  if not icon_widths then
+    icon_widths = {
+      -- max width of expand icon slot (dir: icon + space, file: two spaces)
+      expand = math.max(
+        vim.fn.strdisplaywidth((config.icons.expanded or "") .. " "),
+        vim.fn.strdisplaywidth((config.icons.collapsed or "") .. " "),
+        2
+      ),
+      -- max width of selection icon + trailing space
+      selection = math.max(
+        vim.fn.strdisplaywidth(config.icons.selected .. " "),
+        vim.fn.strdisplaywidth(config.icons.deselected .. " "),
+        vim.fn.strdisplaywidth(config.icons.partially_selected .. " ")
+      ),
+      -- max width of folder icon + trailing space (dirs only)
+      folder = math.max(
+        vim.fn.strdisplaywidth((config.icons.folder_open or "") .. " "),
+        vim.fn.strdisplaywidth((config.icons.folder_closed or "") .. " ")
+      ),
+      -- file type icon + trailing space (e.g. devicons); 0 when disabled
+      file_icon = config.icons.enable_file_icons and 2 or 0,
+    }
+  end
+  local max_width = 0
+  for _, node in ipairs(nodes) do
+    local is_dir = node.children ~= nil
+    local overhead = (depth - 1) * 2
+      + icon_widths.expand
+      + icon_widths.selection
+      + (is_dir and icon_widths.folder or icon_widths.file_icon)
+    local w = overhead + vim.fn.strdisplaywidth(node.name)
+    if w > max_width then
+      max_width = w
+    end
+    if is_dir and #node.children > 0 then
+      local child_max = compute_tree_width(node.children, depth + 1, icon_widths)
+      if child_max > max_width then
+        max_width = child_max
+      end
+    end
+  end
+  return max_width
+end
+
+local function resolve_dimension(value, auto_value, max)
+  if value == 0 then
+    return auto_value
+  elseif value > 0 and value <= 1 then
+    return math.max(1, math.floor(max * value))
+  else
+    return math.floor(value)
+  end
+end
+
+local function resolve_float_position(pos_cfg, width, border_w, pad)
+  -- nui treats position as the content origin; border/padding extend outward.
+  local left_extra = border_w + (pad.left or 0)
+  local right_extra = border_w + (pad.right or 0)
+  local positions = {
+    center = { row = "50%", col = "50%" },
+    left   = { row = 0, col = left_extra },
+    right  = { row = 0, col = math.max(0, vim.o.columns - width - right_extra) },
+  }
+
+  local pos = positions[pos_cfg]
+  if not pos then
+    error("Unknown value '" .. tostring(pos_cfg) .. "' for config entry `ui.tree.float.position`")
+  end
+  return pos
+end
+
 local M = {}
 
 function M.create(opts)
+  local is_float = config.ui.tree.use_float
+
+  -- Build the file tree early so auto-width can use it
+  local file_tree
+  if config.ui.tree.mode == "flat" then
+    file_tree = file_tree_api.build_flat_file_tree(opts.changeset)
+  elseif config.ui.tree.mode == "nested" then
+    file_tree = file_tree_api.build_file_tree(opts.changeset)
+  else
+    error("Unknown value '" .. config.ui.tree.mode .. "' for config entry `ui.tree.mode`")
+  end
+
+  local popup = nil
+  local winid = opts.winid
+
+  if is_float then
+    local float_cfg = config.ui.tree.float
+    local pad = float_cfg.padding or {}
+    local border_w = float_cfg.border ~= "none" and 1 or 0
+    local padding_w = (pad.left or 0) + (pad.right or 0)
+    local border_h = border_w * 2 + (pad.top or 0) + (pad.bottom or 0)
+    local tabline_rows = (vim.o.showtabline == 2
+      or (vim.o.showtabline == 1 and vim.fn.tabpagenr("$") > 1)) and 1 or 0
+    local statusline_rows = vim.o.laststatus > 0 and 1 or 0
+    local available_rows = vim.o.lines - vim.o.cmdheight - statusline_rows - tabline_rows
+    local float_width = resolve_dimension(
+      config.ui.tree.width,
+      compute_tree_width(file_tree) + padding_w,
+      vim.o.columns - border_w * 2 - padding_w
+    )
+    local float_height = resolve_dimension(
+      float_cfg.height,
+      count_tree_nodes(file_tree),
+      available_rows - border_h
+    )
+
+    popup = NuiPopup({
+      enter = true,
+      focusable = true,
+      border = { style = float_cfg.border, padding = float_cfg.padding },
+      relative = "editor",
+      position = resolve_float_position(float_cfg.position, float_width, border_w, pad),
+      size = { width = float_width, height = float_height },
+    })
+    popup:mount()
+    winid = popup.winid
+    -- nui's QuitPre handler calls self:unmount(), which destroys the buffer
+    -- backing the NuiTree. Override unmount on this instance so :q behaves
+    -- like hide() instead. This keeps nui's BufWinEnter handler intact,
+    -- which re-registers WinClosed → hide() after each show().
+    function popup:unmount()
+      self:hide()
+    end
+  elseif not winid then
+    error("opts.winid is required when use_float is false")
+  end
+
   local tree = NuiTree({
-    winid = opts.winid,
-    bufnr = vim.api.nvim_win_get_buf(opts.winid),
+    winid = winid,
+    bufnr = vim.api.nvim_win_get_buf(winid),
     nodes = {},
 
     prepare_node = function(node)
@@ -213,7 +355,7 @@ function M.create(opts)
     end,
   })
 
-  local buf = vim.api.nvim_win_get_buf(opts.winid)
+  local buf = vim.api.nvim_win_get_buf(winid)
 
   local Component = {
     buf = buf,
@@ -221,6 +363,43 @@ function M.create(opts)
 
   function Component.render()
     tree:render()
+  end
+
+  if is_float then
+    function Component.focus()
+      if popup.winid and vim.api.nvim_win_is_valid(popup.winid) then
+        vim.api.nvim_set_current_win(popup.winid)
+      end
+    end
+
+    function Component.close()
+      if popup.winid and vim.api.nvim_win_is_valid(popup.winid) then
+        popup:hide()
+      end
+    end
+
+    function Component.toggle()
+      if popup.winid and vim.api.nvim_win_is_valid(popup.winid) then
+        popup:hide()
+      else
+        -- Clear stale winid so _open_window() doesn't short-circuit
+        popup.winid = nil
+        popup:show()
+        vim.api.nvim_set_current_win(popup.winid)
+      end
+    end
+  else
+    function Component.focus()
+      vim.api.nvim_set_current_win(winid)
+    end
+
+    function Component.close()
+      -- no-op for embedded modes
+    end
+
+    function Component.toggle()
+      vim.api.nvim_set_current_win(winid)
+    end
   end
 
   local callback_opts = { tree = Component }
@@ -286,15 +465,6 @@ function M.create(opts)
 
   config.hooks.on_tree_mount({ buf = buf, tree = tree, opts = opts })
 
-  local file_tree
-  if config.ui.tree.mode == "nested" then
-    file_tree = file_tree_api.build_file_tree(opts.changeset)
-  elseif config.ui.tree.mode == "flat" then
-    file_tree = file_tree_api.build_flat_file_tree(opts.changeset)
-  else
-    error("Unknown value '" .. config.ui.tree("' for config entry `ui.tree.mode`"))
-  end
-
   tree:set_nodes(file_tree_to_nodes(file_tree))
   Component.render()
 
@@ -302,7 +472,7 @@ function M.create(opts)
   if selected_file then
     local _, selected_linenr = find_node_by_filepath(tree, selected_file.change.filepath)
     if selected_linenr then
-      vim.api.nvim_win_set_cursor(opts.winid, { selected_linenr, 0 })
+      vim.api.nvim_win_set_cursor(winid, { selected_linenr, 0 })
     end
 
     opts.on_preview(selected_file.change, callback_opts)
