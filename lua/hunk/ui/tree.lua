@@ -222,7 +222,7 @@ local function compute_tree_width(nodes, depth, icon_widths)
 end
 
 local function resolve_dimension(value, auto_value, max)
-  if value == 0 then
+  if value == "auto" or value == 0 then
     return auto_value
   elseif value > 0 and value <= 1 then
     return math.max(1, math.floor(max * value))

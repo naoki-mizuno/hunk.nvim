@@ -88,14 +88,14 @@ hunk.setup({
     tree = {
       -- Mode can either be `nested` or `flat`
       mode = "nested",
-      -- Width of the tree (or float). 0 = auto-fit, 0 < n <= 1 = fraction of editor width, n > 1 = columns
+      -- Width of the tree (or float). "auto" = auto-fit, 0 < n <= 1 = fraction of editor width, n > 1 = columns
       width = 35,
       -- When true the file tree opens as a floating window instead of a fixed split
       use_float = false,
       float = {
         -- Height of the floating window.
-        -- 0 = auto-fit to content, 0 < n <= 1 = fraction of editor height, n > 1 = lines
-        height = 0,
+        -- "auto" = auto-fit to content, 0 < n <= 1 = fraction of editor height, n > 1 = lines
+        height = "auto",
         -- Border style: "rounded", "single", "double", "solid", "shadow", "none",
         -- or a custom array of border characters (see nui.popup docs)
         border = "rounded",
