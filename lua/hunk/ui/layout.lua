@@ -18,7 +18,7 @@ local function create_horizontal_split()
   return winid
 end
 
-local function resize_tree(tree, left, right, size, layout)
+function M.resize_tree(tree, left, right, size, layout)
   local total_width = vim.api.nvim_get_option_value("columns", {})
   local remaining_width = total_width - size
   local equal_width = math.floor(remaining_width / 2)
@@ -98,7 +98,6 @@ function M.create_layout()
     "HunkSignDeselected:Green",
   })
 
-  resize_tree(tree_window, left_diff, right_diff, config.ui.tree.width, config.ui.layout)
   vim.api.nvim_set_option_value("winfixwidth", true, { win = tree_window })
 
   vim.api.nvim_set_current_win(tree_window)

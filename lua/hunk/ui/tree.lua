@@ -357,8 +357,16 @@ function M.create(opts)
 
   local buf = vim.api.nvim_win_get_buf(winid)
 
+  local textoff = vim.fn.getwininfo(winid)[1].textoff or 0
+  local resolved_width = resolve_dimension(
+    config.ui.tree.width,
+    compute_tree_width(file_tree) + textoff,
+    vim.o.columns
+  )
+
   local Component = {
     buf = buf,
+    width = resolved_width,
   }
 
   function Component.render()

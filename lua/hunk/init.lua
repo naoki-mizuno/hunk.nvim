@@ -256,6 +256,10 @@ function M.start(left, right, output)
     end,
   })
 
+  if layout.tree then
+    ui.layout.resize_tree(layout.tree, layout.left, layout.right, tree.width, config.ui.layout)
+  end
+
   tree.render()
 
   set_global_bindings(layout, tree.buf, tree)
