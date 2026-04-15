@@ -364,6 +364,8 @@ function M.create(opts)
     vim.o.columns
   )
 
+  local last_selected_path = nil
+
   local Component = {
     buf = buf,
     width = resolved_width,
@@ -394,6 +396,12 @@ function M.create(opts)
         popup.winid = nil
         popup:show()
         vim.api.nvim_set_current_win(popup.winid)
+        if last_selected_path then
+          local _, linenr = find_node_by_filepath(tree, last_selected_path)
+          if linenr then
+            vim.api.nvim_win_set_cursor(popup.winid, { linenr, 0 })
+          end
+        end
       end
     end
   else
@@ -424,6 +432,7 @@ function M.create(opts)
     map("n", chord, function()
       local node = tree:get_node()
       if node and node.type == "file" then
+        last_selected_path = node.change.filepath
         opts.on_open(node.change, callback_opts)
       end
     end, "Open file under cursor")
