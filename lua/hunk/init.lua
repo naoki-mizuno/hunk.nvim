@@ -5,6 +5,7 @@ local ui = require("hunk.ui")
 
 local M = {}
 
+---@type table?
 local CONTEXT
 
 local function value_or_default(value, default)
@@ -248,6 +249,8 @@ function M.start(left, right, output)
   set_global_bindings(layout, tree.buf)
 end
 
+--- Setup the plugin with user configuration.
+---@param opts hunk.Config? User configuration overrides
 function M.setup(opts)
   opts = opts or {}
   config.update_config(opts)

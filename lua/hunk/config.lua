@@ -1,3 +1,57 @@
+---@class hunk.KeysGlobal
+---@field quit string|string[] Keybinding(s) to quit (exit with non-zero code)
+---@field accept string|string[] Keybinding(s) to accept the current selection
+---@field focus_tree string|string[] Keybinding(s) to focus the file tree
+
+---@class hunk.KeysTree
+---@field expand_node string|string[] Keybinding(s) to expand a tree node
+---@field collapse_node string|string[] Keybinding(s) to collapse a tree node
+---@field open_file string|string[] Keybinding(s) to open file under cursor
+---@field toggle_file string|string[] Keybinding(s) to toggle all hunks in file
+
+---@class hunk.KeysDiff
+---@field toggle_hunk string|string[] Keybinding(s) to toggle entire hunk under cursor
+---@field toggle_line string|string[] Keybinding(s) to toggle line under cursor
+---@field toggle_line_pair string|string[] Keybinding(s) to toggle line pair on both sides
+---@field prev_hunk string|string[] Keybinding(s) to jump to previous hunk
+---@field next_hunk string|string[] Keybinding(s) to jump to next hunk
+---@field toggle_focus string|string[] Keybinding(s) to toggle focus between left/right
+
+---@class hunk.Keys
+---@field global hunk.KeysGlobal
+---@field tree hunk.KeysTree
+---@field diff hunk.KeysDiff
+
+---@class hunk.UiTree
+---@field mode "nested"|"flat" Tree display mode
+---@field width number Width of the file tree panel
+
+---@class hunk.Ui
+---@field tree hunk.UiTree
+---@field layout "vertical"|"horizontal" Diff split layout direction
+---@field confirm_before_quit boolean Show a confirmation before quitting
+
+---@class hunk.Icons
+---@field enable_file_icons boolean Whether to show file type icons
+---@field selected string Icon for selected items
+---@field deselected string Icon for deselected items
+---@field partially_selected string Icon for partially selected items
+---@field folder_open string Icon for open folders
+---@field folder_closed string Icon for closed folders
+---@field expanded string Icon for expanded tree nodes
+---@field collapsed string Icon for collapsed tree nodes
+
+---@class hunk.Hooks
+---@field on_tree_mount fun(context: { buf: number, tree: NuiTree, opts: table }) Called after tree buffer is mounted
+---@field on_diff_mount fun(context: { buf: number, win: number }) Called after diff buffer is mounted
+
+---@class hunk.Config
+---@field keys hunk.Keys
+---@field ui hunk.Ui
+---@field icons hunk.Icons
+---@field hooks hunk.Hooks
+
+---@type hunk.Config
 local M = {
   keys = {
     global = {
