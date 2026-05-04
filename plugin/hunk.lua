@@ -1,5 +1,5 @@
 if vim.g.loaded_hunk_nvim then
-    return
+  return
 end
 vim.g.loaded_hunk_nvim = true
 
