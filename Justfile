@@ -24,10 +24,15 @@ prepare-nvim channel:
 
   NVIM_DIR=".build/nvim/{{ channel }}"
 
+  case "$(arch)" in
+    aarch64) NVIM_ARCH="arm64" ;;
+    *) NVIM_ARCH="$(arch)" ;;
+  esac
+
   test -d $NVIM_DIR || {
     mkdir -p $NVIM_DIR
 
-    curl -L https://github.com/neovim/neovim/releases/download/{{ channel }}/nvim-linux-$(arch).tar.gz > ./.build/nvim-linux.tar.gz
+    curl -L https://github.com/neovim/neovim/releases/download/{{ channel }}/nvim-linux-${NVIM_ARCH}.tar.gz > ./.build/nvim-linux.tar.gz
     tar xzf ./.build/nvim-linux.tar.gz -C $NVIM_DIR --strip-components=1
     rm ./.build/nvim-linux.tar.gz
   }
@@ -61,6 +66,7 @@ run channel="stable": (prepare channel)
   #!/usr/bin/env bash
   set -eo pipefail
 
+  TMPDIR="${TMPDIR:-/tmp}"
   NVIM_DIR=".build/nvim/{{ channel }}"
 
   rm -r $TMPDIR/hunk-nvim-run/ || true
@@ -74,6 +80,8 @@ run channel="stable": (prepare channel)
 run-local:
   #!/usr/bin/env bash
   set -eo pipefail
+
+  TMPDIR="${TMPDIR:-/tmp}"
 
   rm -r $TMPDIR/hunk-nvim-run/ || true
   cp -a dev/fixture $TMPDIR/hunk-nvim-run/
