@@ -1,0 +1,25 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stylua:
+    name: StyLua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check formatting with StyLua
+        uses: JohnnyMorganz/stylua-action@76fd70c03e6340ceaf673366712db9b20560b402  # v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: v2.4.1
+          args: --check .
