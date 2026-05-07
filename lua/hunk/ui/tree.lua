@@ -54,7 +54,7 @@ local function file_tree_to_nodes(file_tree)
 
     local highlight
     if node.type == "dir" then
-      highlight = "Green"
+      highlight = "HunkTreeDir"
     elseif node.type == "file" then
       highlight = get_change_color("HunkTreeFile", node.change)
     else

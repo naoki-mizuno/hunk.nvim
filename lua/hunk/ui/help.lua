@@ -71,13 +71,13 @@ function M.create()
 
   vim.api.nvim_set_hl(0, "HunkHelpTitle", {
     default = true,
-    link = "Orange",
+    link = "Title",
     bold = true,
   })
 
   vim.api.nvim_set_hl(0, "HunkHelpCommandName", {
     default = true,
-    link = "Yellow",
+    link = "Identifier",
     bold = true,
   })
 

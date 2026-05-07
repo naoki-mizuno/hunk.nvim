@@ -48,14 +48,14 @@ function M.create_layout()
     "DiffAdd:HunkDiffAddAsDelete",
     "DiffDelete:HunkDiffDeleteDim",
 
-    "HunkSignSelected:Red",
-    "HunkSignDeselected:Red",
+    "HunkSignSelected:HunkSignDelete",
+    "HunkSignDeselected:HunkSignDelete",
   })
 
   highlights.set_win_hl(right_diff, {
     "DiffDelete:HunkDiffDeleteDim",
-    "HunkSignSelected:Green",
-    "HunkSignDeselected:Green",
+    "HunkSignSelected:HunkSignAdd",
+    "HunkSignDeselected:HunkSignAdd",
   })
 
   resize_tree(tree_window, left_diff, right_diff, config.ui.tree.width, config.ui.layout)

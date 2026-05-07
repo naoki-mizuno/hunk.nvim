@@ -40,25 +40,40 @@ function M.define_highlights()
 
   vim.api.nvim_set_hl(0, "HunkTreeFileAdded", {
     default = true,
-    link = "Green",
+    link = "DiagnosticOk",
   })
   vim.api.nvim_set_hl(0, "HunkTreeFileDeleted", {
     default = true,
-    link = "Red",
+    link = "DiagnosticError",
   })
   vim.api.nvim_set_hl(0, "HunkTreeFileModified", {
     default = true,
-    link = "Blue",
+    link = "DiagnosticInfo",
+  })
+
+  vim.api.nvim_set_hl(0, "HunkTreeDir", {
+    default = true,
+    link = "Directory",
   })
 
   vim.api.nvim_set_hl(0, "HunkTreeDirIcon", {
     default = true,
-    link = "Yellow",
+    link = "Directory",
   })
 
   vim.api.nvim_set_hl(0, "HunkTreeSelectionIcon", {
     default = true,
     link = "Comment",
+  })
+
+  vim.api.nvim_set_hl(0, "HunkSignAdd", {
+    default = true,
+    link = "DiagnosticOk",
+  })
+
+  vim.api.nvim_set_hl(0, "HunkSignDelete", {
+    default = true,
+    link = "DiagnosticError",
   })
 end
 
